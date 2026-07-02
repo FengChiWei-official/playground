@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"name": "Haskell",
+			"path": "./FP/Haskell"
+		},
+		{
+			"name": "Lean4",
+			"path": "./FP/Lean4"
+		},
+		{
+			"name": "CPP",
+			"path": "OOP/CPP"
+		},
+		{
+			"name": "Python",
+			"path": "OOP/Python"
+		}
+		
+	],
+	"settings": {}
+}
