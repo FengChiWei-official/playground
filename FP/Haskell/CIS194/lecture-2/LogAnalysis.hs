@@ -2,6 +2,7 @@
 module LogAnalysis where
 
 import Log
+import Data.Maybe (mapMaybe)
 
 
 parseMessage :: String -> LogMessage
@@ -18,27 +19,23 @@ parse = map parseMessage . lines
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) tree = tree
 insert m Leaf = Node Leaf m Leaf
-insert m@(LogMessage _ ts _) (Node l m'@(LogMessage _ ts' _) r) 
-    | ts <= ts' = Node (insert m l) m' r 
-    | otherwise = Node l m' (insert m r)
+insert m (Node l m'@(LogMessage _ ts' _) r) =
+    case m of
+        LogMessage _ ts _
+            | ts <= ts' -> Node (insert m l) m' r
+            | otherwise -> Node l m' (insert m r)
+insert _ node@(Node _ (Unknown _) _) = node
 
 build :: [LogMessage] -> MessageTree
-build [] = Leaf
-build x = go Leaf x
-    where 
-        go :: MessageTree -> [LogMessage] -> MessageTree
-        go acc [] = acc
-        go acc (a:as) = go (insert a acc) as
+build = foldr insert Leaf
 
 inOrder :: MessageTree -> [LogMessage]
 inOrder Leaf = []
 inOrder (Node l m r) = inOrder l ++ [m] ++ inOrder r
 
--- 从排序后的LogMessage采集所有报错级别高于等于50的String信息
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong x = map getInfo $ filter tst x
+whatWentWrong = mapMaybe severeInfo . inOrder . build
     where
-        tst (LogMessage (Error lv) _ _) = lv >= 50
-        tst _ = False
-        getInfo (LogMessage _ _ info) = info
-        getInfo _ = "It is not for Unknown"
+        severeInfo (LogMessage (Error lv) _ info)
+            | lv >= 50 = Just info
+        severeInfo _ = Nothing
