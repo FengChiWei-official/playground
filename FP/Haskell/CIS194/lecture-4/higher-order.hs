@@ -37,3 +37,32 @@ fun2'' = sum . unfoldr step
     where
         step 1 = Nothing
         step n = Just (n, if even n then n `div` 2 else 3 * n + 1)
+
+
+data Tree a = Leaf
+            | Node Integer (Tree a) a (Tree a)
+    deriving (Show, Eq)
+
+foldTree :: [a] -> Tree a
+
+makeNode:: a -> Tree a
+makeNode x = Node 0 Leaf x Leaf
+
+insert :: a -> Tree a -> Tree a 
+insert a (_ left root right) = 
+
+foldTree = foldr insert Leaf
+    where
+        insert value Leaf = Node 0 Leaf value Leaf
+        insert value (Node _ left root right)
+            | height left <= height right = makeNode left' root right
+            | otherwise = makeNode left root right'
+            where
+                left' = insert value left
+                right' = insert value right
+
+        makeNode left root right =
+            Node (1 + max (height left) (height right)) left root right
+
+        height Leaf = -1
+        height (Node value _ _ _) = value
