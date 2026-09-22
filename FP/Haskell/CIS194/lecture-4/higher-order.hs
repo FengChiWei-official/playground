@@ -45,24 +45,21 @@ data Tree a = Leaf
 
 foldTree :: [a] -> Tree a
 
+foldTree = foldr insert Leaf
+
 makeNode:: a -> Tree a
 makeNode x = Node 0 Leaf x Leaf
 
+height :: Tree a -> Integer
+height Leaf = -1
+height (Node x _ _ _) = x
+
+reBuild :: Tree a -> a -> Tree a -> Tree a
+reBuild l root r = Node (max (height l) (height r) + 1) l root r
+
+
 insert :: a -> Tree a -> Tree a 
-insert a (_ left root right) = 
-
-foldTree = foldr insert Leaf
-    where
-        insert value Leaf = Node 0 Leaf value Leaf
-        insert value (Node _ left root right)
-            | height left <= height right = makeNode left' root right
-            | otherwise = makeNode left root right'
-            where
-                left' = insert value left
-                right' = insert value right
-
-        makeNode left root right =
-            Node (1 + max (height left) (height right)) left root right
-
-        height Leaf = -1
-        height (Node value _ _ _) = value
+insert a Leaf = Node 0 Leaf a Leaf
+insert a (Node _ left root right)
+    | height left <= height right = reBuild (insert a left) root right
+    | otherwise = reBuild left root (insert a right)
