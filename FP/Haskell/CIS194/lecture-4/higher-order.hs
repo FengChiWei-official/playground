@@ -1,6 +1,13 @@
 import Data.List (unfoldr)
 -- Practicing applying Wholemeal Programming
 
+-- my foldr
+
+import Data.Monoid (Endo(..))
+
+myFoldr :: Foldable t => (a -> b -> b) -> b -> t a -> b
+myFoldr f base xs = appEndo (foldMap (\x -> Endo (\y -> f x y)) xs) base
+
 -- 原型
 fun1' :: [Integer] -> Integer
 
@@ -63,3 +70,26 @@ insert a Leaf = Node 0 Leaf a Leaf
 insert a (Node _ left root right)
     | height left <= height right = reBuild (insert a left) root right
     | otherwise = reBuild left root (insert a right)
+
+-- More folds
+
+xor :: [Bool] -> Bool
+xor  = foldr (/=) False 
+
+map' :: (a -> b) -> [a] -> [b]
+map' f l = foldr (\x y -> (f x): y) [] l
+
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (\x packed y -> packed (f y x)) id xs base
+
+-- f [1 2 3]
+
+-- generate odd primes
+
+sieveSundaram::Integer -> [Integer]
+sieveSundaram n = map (\x -> 2 * x + 1) remaining
+    where
+        remaining = filter (`notElem` removed) [1 .. n]
+        removed = [i + j + 2 * i * j
+                  | i <- [1 .. n], j <- [i .. n]
+                  , i + j + 2 * i * j <= n]
